@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    h2, h3 {
+      color: #333;
+      text-align: center;
+    }
+    nav {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    nav button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    nav button:hover {
+      background-color: #45a049;
+    }
+    .form-section {
+      display: none;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    @media (max-width: 768px) {
+      nav button {
+        width: 100%;
+        margin: 5px 0;
+      }
+      .form-section {
+        width: 90%;
+        padding: 15px;
+      }
+    }
+    @media (max-width: 480px) {
+      body {
+        margin: 10px;
+      }
+      .form-section {
+        width: 100%;
+        padding: 10px;
+      }
+      input, select, textarea, button[type="submit"] {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Finance Tracker</h2>
+
+  <nav>
+    <button onclick="showSection('income')">Income Data</button>
+    <button onclick="showSection('expenses')">Expense Data</button>
+    <button onclick="showSection('loans')">Loans</button>
+    <button onclick="showSection('investments')">Investments</button>
+  </nav>
+
+  <!-- Income Data Section -->
+  <div id="income" class="form-section">
+    <h3>Income Data</h3>
+    <form>
+      <label for="income-amount">Income Amount</label>
+      <!-- Changed name to "amount" -->
+      <input type="number" id="income-amount" name="amount" placeholder="Enter income amount" required>
+
+      <label for="income-source">Income Source</label>
+      <!-- Changed name to "source" -->
+      <select id="income-source" name="source" required>
+        <option value="Nepsix Salary">Nepsix Salary</option>
+        <option value="Nepsix Commission">Nepsix Commission</option>
+        <option value="Freelance">Freelance</option>
+      </select>
+
+      <label for="income-date">Income Date</label>
+      <!-- Changed name to "income_date" -->
+      <input type="date" id="income-date" name="income_date" required>
+
+      <button type="submit">Save Income</button>
+    </form>
+  </div>
+
+  <!-- Expense Data Section -->
+  <div id="expenses" class="form-section">
+    <h3>Expense Data</h3>
+    <form>
+      <label for="expense-amount">Expense Amount</label>
+      <input type="number" id="expense-amount" name="amount" placeholder="Enter expense amount" required>
+
+      <label for="expense-category">Expense Category</label>
+      <select id="expense-category" name="category" required>
+        <option value="Rent">Rent</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Food">Food</option>
+        <option value="Travel">Travel</option>
+        <option value="Family Support">Family Support</option>
+        <option value="Alms">Alms</option>
+        <option value="Tithe">Tithe</option>
+        <option value="Ministry Giving">Ministry Giving</option>
+      </select>
+
+      <label for="expense-date">Expense Date</label>
+      <input type="date" id="expense-date" name="expense_date" required>
+
+      <label for="expense-notes">Expense Notes</label>
+      <textarea id="expense-notes" name="notes" placeholder="Additional details about the expense"></textarea>
+
+      <button type="submit">Save Expense</button>
+    </form>
+  </div>
+
+  <!-- Loans Section -->
+  <div id="loans" class="form-section">
+    <h3>Loans</h3>
+    <form>
+      <label for="loan-amount">Loan Amount</label>
+      <input type="number" id="loan-amount" name="amount" placeholder="Enter loan amount" required>
+
+      <label for="lender-name">Lender Name</label>
+      <input type="text" id="lender-name" name="lender_name" placeholder="Enter lender name" required>
+
+      <label for="loan-date">Loan Date</label>
+      <input type="date" id="loan-date" name="loan_date" required>
+
+      <label for="maturity-date">Maturity Date</label>
+      <input type="date" id="maturity-date" name="maturity_date" required>
+
+      <label for="payment-status">Payment Status</label>
+      <select id="payment-status" name="payment_status" required>
+        <option value="Paid">Paid</option>
+        <option value="Unpaid">Unpaid</option>
+        <option value="Partial">Partial</option>
+      </select>
+
+      <button type="submit">Save Loan</button>
+    </form>
+  </div>
+
+  <!-- Investments Section -->
+  <div id="investments" class="form-section">
+    <h3>Investments</h3>
+    <form>
+      <label for="investment-amount">Investment Amount</label>
+      <input type="number" id="investment-amount" name="amount" placeholder="Enter investment amount" required>
+
+      <label for="investment-type">Investment Type</label>
+      <select id="investment-type" name="investment_type" required>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Stocks">Stocks</option>
+        <option value="Bonds">Bonds</option>
+        <option value="Mutual Funds">Mutual Funds</option>
+        <option value="Cryptocurrency">Cryptocurrency</option>
+      </select>
+
+      <label for="investment-date">Investment Date</label>
+      <input type="date" id="investment-date" name="investment_date" required>
+
+      <label for="investment-maturity-date">Investment Maturity Date</label>
+      <!-- Changed name to "maturity_date" -->
+      <input type="date" id="investment-maturity-date" name="maturity_date" required>
+
+      <button type="submit">Save Investment</button>
+    </form>
+  </div>
+
+  <script>
+    function showSection(sectionId) {
+      const sections = document.querySelectorAll('.form-section');
+      sections.forEach(section => section.style.display = 'none');
+
+      const activeSection = document.getElementById(sectionId);
+      activeSection.style.display = 'block';
+
+      // Attach event listeners only after showing the section
+      bindFormIfNotBound(sectionId);
+    }
+
+    function bindFormIfNotBound(formId) {
+      const form = document.querySelector(`#${formId} form`);
+      if (!form.dataset.bound) {
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const data = {};
+          const inputs = form.querySelectorAll('input, select, textarea');
+          inputs.forEach(input => {
+            data[input.name] = input.value;
+          });
+          try {
+            const response = await fetch(`http://localhost:5000/${formId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+              throw new Error(`Server Error: ${response.status}`);
+            }
+            const message = await response.text();
+            alert(message);
+            // Reset form fields
+            inputs.forEach(input => input.value = '');
+          } catch (error) {
+            console.error('Error:', error);
+            alert(`Failed to add ${formId} ❌`);
+          }
+        });
+        form.dataset.bound = "true";
+      }
+    }
+  </script>
+
+</body>
+</html>
