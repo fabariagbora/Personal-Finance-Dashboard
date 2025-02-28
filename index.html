@@ -229,7 +229,7 @@
             data[input.name] = input.value;
           });
           try {
-            const response = await fetch(`http://localhost:5000/${formId}`, {
+            const response = await fetch(`https://personal-finance-dashboard-uu8u.onrender.com/${formId}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data)
