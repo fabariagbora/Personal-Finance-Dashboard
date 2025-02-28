@@ -104,11 +104,9 @@
     <h3>Income Data</h3>
     <form>
       <label for="income-amount">Income Amount</label>
-      <!-- Changed name to "amount" -->
       <input type="number" id="income-amount" name="amount" placeholder="Enter income amount" required>
 
       <label for="income-source">Income Source</label>
-      <!-- Changed name to "source" -->
       <select id="income-source" name="source" required>
         <option value="Nepsix Salary">Nepsix Salary</option>
         <option value="Nepsix Commission">Nepsix Commission</option>
@@ -116,7 +114,6 @@
       </select>
 
       <label for="income-date">Income Date</label>
-      <!-- Changed name to "income_date" -->
       <input type="date" id="income-date" name="income_date" required>
 
       <button type="submit">Save Income</button>
@@ -199,7 +196,6 @@
       <input type="date" id="investment-date" name="investment_date" required>
 
       <label for="investment-maturity-date">Investment Maturity Date</label>
-      <!-- Changed name to "maturity_date" -->
       <input type="date" id="investment-maturity-date" name="maturity_date" required>
 
       <button type="submit">Save Investment</button>
@@ -229,6 +225,7 @@
             data[input.name] = input.value;
           });
           try {
+            // Updated to use the production server URL
             const response = await fetch(`https://personal-finance-dashboard-uu8u.onrender.com/${formId}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
