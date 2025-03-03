@@ -145,13 +145,13 @@ app.post('/loans', async (req, res) => {
     const { amount, lender_name, loan_date, maturity_date, payment_status } = req.body;
     try {
         await queryDatabase(
-            `INSERT INTO Personal_Finance.Loans (amount, lender_name, loan_date, maturity_date, payment_status) VALUES (@amount, @lender_name, @loan_date, @maturity_date, @payment_status)`,
+            `INSERT INTO Personal_Finance.Loans (amount, lender_name, loan_date, maturity_date, loan_notes) VALUES (@amount, @lender_name, @loan_date, @maturity_date, @loan_notes)`,
             [
                 { name: 'amount', type: sql.Decimal(10, 2), value: amount },
                 { name: 'lender_name', type: sql.NVarChar(255), value: lender_name },
                 { name: 'loan_date', type: sql.Date, value: loan_date },
                 { name: 'maturity_date', type: sql.Date, value: maturity_date },
-                { name: 'payment_status', type: sql.NVarChar(50), value: payment_status }
+                { name: 'loan_notes', type: sql.NVarChar(500), value: loan_notes || ''  }
             ]
         );
         res.send('Loan record added successfully ✅');
