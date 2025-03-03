@@ -142,7 +142,7 @@ app.get('/loans', async (req, res) => {
 
 // 🔹 Add New Loan Record
 app.post('/loans', async (req, res) => {
-    const { amount, lender_name, loan_date, maturity_date, payment_status } = req.body;
+    const { amount, lender_name, loan_date, maturity_date, loan_notes } = req.body;
     try {
         await queryDatabase(
             `INSERT INTO Personal_Finance.Loans (amount, lender_name, loan_date, maturity_date, loan_notes) VALUES (@amount, @lender_name, @loan_date, @maturity_date, @loan_notes)`,
