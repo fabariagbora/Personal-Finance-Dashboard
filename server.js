@@ -68,30 +68,24 @@ app.get('/income', async (req, res) => {
 app.post('/income', async (req, res) => {
     const { amount, source, income_date } = req.body;
 
-    console.log("Received Data:", req.body); // Debug incoming request
-
     if (!amount || !source || !income_date) {
         return res.status(400).json({ error: 'All fields are required!' });
     }
 
     try {
-        let pool = await sql.connect(dbConfig);
-        let result = await pool.request()
-            .input('amount', sql.Decimal(10, 2), amount)
-            .input('source', sql.NVarChar(255), source)
-            .input('income_date', sql.Date, income_date)
-            .query(`INSERT INTO Personal_Finance.Income (amount, source, income_date) VALUES (@amount, @source, @income_date)`);
-
-        console.log("Inserted Data Result:", result); // Debug SQL response
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Income (amount, source, income_date) VALUES (@amount, @source, @income_date)`,
+            [
+                { name: 'amount', type: sql.Decimal(10, 2), value: amount },
+                { name: 'source', type: sql.NVarChar(255), value: source },
+                { name: 'income_date', type: sql.Date, value: income_date }
+            ]
+        );
         res.send('Income record added successfully ✅');
     } catch (err) {
-        console.error("SQL Error:", err);
         res.status(500).json({ error: err.message });
-    } finally {
-        sql.close();
     }
 });
-
 
 // 🔹 Get All Expense Records
 app.get('/expenses', async (req, res) => {
@@ -107,8 +101,6 @@ app.get('/expenses', async (req, res) => {
 app.post('/expenses', async (req, res) => {
     const { amount, category, expense_date, notes } = req.body;
 
-    console.log("Received Expense Data:", req.body); // Debug log
-
     if (!amount || !category || !expense_date) {
         return res.status(400).json({ error: 'Amount, category, and expense_date are required!' });
     }
@@ -120,12 +112,11 @@ app.post('/expenses', async (req, res) => {
                 { name: 'amount', type: sql.Decimal(10, 2), value: amount },
                 { name: 'category', type: sql.NVarChar(255), value: category },
                 { name: 'expense_date', type: sql.Date, value: expense_date },
-                { name: 'notes', type: sql.NVarChar(500), value: notes || '' } // Handle optional notes
+                { name: 'notes', type: sql.NVarChar(500), value: notes || '' }
             ]
         );
         res.send('Expense record added successfully ✅');
     } catch (err) {
-        console.error("SQL Error (Expenses):", err); // Debug SQL errors
         res.status(500).json({ error: err.message });
     }
 });
@@ -143,6 +134,7 @@ app.get('/loans', async (req, res) => {
 // 🔹 Add New Loan Record
 app.post('/loans', async (req, res) => {
     const { amount, lender_name, loan_date, maturity_date, loan_notes } = req.body;
+
     try {
         await queryDatabase(
             `INSERT INTO Personal_Finance.Loans (amount, lender_name, loan_date, maturity_date, loan_notes) VALUES (@amount, @lender_name, @loan_date, @maturity_date, @loan_notes)`,
@@ -151,7 +143,7 @@ app.post('/loans', async (req, res) => {
                 { name: 'lender_name', type: sql.NVarChar(255), value: lender_name },
                 { name: 'loan_date', type: sql.Date, value: loan_date },
                 { name: 'maturity_date', type: sql.Date, value: maturity_date },
-                { name: 'loan_notes', type: sql.NVarChar(500), value: loan_notes || ''  }
+                { name: 'loan_notes', type: sql.NVarChar(500), value: loan_notes || '' }
             ]
         );
         res.send('Loan record added successfully ✅');
@@ -174,8 +166,6 @@ app.get('/investments', async (req, res) => {
 app.post('/investments', async (req, res) => {
     const { amount, investment_type, investment_date, maturity_date } = req.body;
 
-    console.log("Received Investment Data:", req.body); // Debug log
-
     if (!amount || !investment_type || !investment_date || !maturity_date) {
         return res.status(400).json({ error: 'All fields are required!' });
     }
@@ -192,12 +182,43 @@ app.post('/investments', async (req, res) => {
         );
         res.send('Investment record added successfully ✅');
     } catch (err) {
-        console.error("SQL Error (Investments):", err); // Debug SQL errors
         res.status(500).json({ error: err.message });
     }
 });
 
+// 🔹 Get Investment Status
+app.get('/investment-status', async (req, res) => {
+    try {
+        const result = await queryDatabase('SELECT * FROM Personal_Finance.Investment_Status');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add Investment Status Update
+app.post('/investment-status', async (req, res) => {
+    const { investment_id, status_date, current_value } = req.body;
+
+    if (!investment_id || !status_date || !current_value) {
+        return res.status(400).json({ error: 'All fields are required!' });
+    }
+
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Investment_Status (investment_id, status_date, current_value) VALUES (@investment_id, @status_date, @current_value)`,
+            [
+                { name: 'investment_id', type: sql.Int, value: investment_id },
+                { name: 'status_date', type: sql.Date, value: status_date },
+                { name: 'current_value', type: sql.Decimal(10, 2), value: current_value }
+            ]
+        );
+        res.send('Investment status updated successfully ✅');
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on https://personal-finance-dashboard-uu8u.onrender.com/${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
