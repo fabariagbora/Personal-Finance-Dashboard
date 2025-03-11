@@ -42,7 +42,7 @@ app.get("/investments", async (req, res) => {
     const pool = await getDbPool();
     const result = await pool
       .request()
-      .query("SELECT id, amount, investment_type FROM investments");
+      .query("SELECT id, amount, investment_type FROM Personal_Finance.Investments");
     
     res.json(result.recordset);
   } catch (error) {
@@ -84,8 +84,8 @@ app.get("/investment-status", async (req, res) => {
     const result = await pool.request().query(`
       SELECT is.id, is.investment_id, is.status_date, is.current_value, 
              i.amount AS investment_amount, i.investment_type
-      FROM investment_status is
-      JOIN investments i ON is.investment_id = i.id
+      FROM Personal_Finance.Investment_status is
+      JOIN Personal_Finance.Investments i ON is.investment_id = i.id
     `);
     
     res.json(result.recordset);
@@ -109,7 +109,7 @@ app.post("/investment-status", async (req, res) => {
       .input("status_date", sql.Date, status_date)
       .input("current_value", sql.Decimal(18, 2), current_value)
       .query(`
-        INSERT INTO investment_status (investment_id, status_date, current_value)
+        INSERT INTO Personal_Finance.Investment_status (investment_id, status_date, current_value)
         VALUES (@investment_id, @status_date, @current_value)
       `);
 
