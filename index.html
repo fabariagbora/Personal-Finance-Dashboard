@@ -203,10 +203,15 @@
 <div id="investment-status" class="form-section">
   <h3>Update Investment Status</h3>
   <form id="investment-status-form">
+    
     <label for="investment-select">Select Investment</label>
     <select id="investment-select" name="investment_id" required>
       <option value="">Loading investments...</option>
     </select>
+
+    <!-- Investment ID Field (Read-Only) -->
+    <label for="investment-id">Investment ID</label>
+    <input type="text" id="investment-id" name="investment_id_display" readonly>
 
     <label for="status-date">Status Date</label>
     <input type="date" id="status-date" name="status_date" required>
@@ -226,12 +231,10 @@
       const activeSection = document.getElementById(sectionId);
       activeSection.style.display = 'block';
 
-      // If the section is "investment-status", fetch investments
       if (sectionId === 'investment-status') {
           fetchInvestments();
       }
 
-      // Attach event listener if not already bound
       bindFormIfNotBound(sectionId);
   }
 
@@ -240,13 +243,22 @@
           const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investments");
           const investments = await response.json();
           const select = document.getElementById("investment-select");
+          const investmentIdField = document.getElementById("investment-id");
+
           select.innerHTML = '<option value="">Select an investment</option>';
+
           investments.forEach(investment => {
               const option = document.createElement("option");
               option.value = investment.id;
               option.textContent = `${investment.investment_type} - ₦${investment.amount}`;
               select.appendChild(option);
           });
+
+          // Ensure investment ID updates when a selection is made
+          select.addEventListener("change", function () {
+              investmentIdField.value = select.value; 
+          });
+
       } catch (error) {
           console.error("Failed to fetch investments:", error);
       }
@@ -257,29 +269,42 @@
       if (!form.dataset.bound) {
           form.addEventListener('submit', async function (e) {
               e.preventDefault();
-              const data = {};
-              const inputs = form.querySelectorAll('input, select, textarea');
-              inputs.forEach(input => {
-                  data[input.name] = input.value;
-              });
+
+              const investmentSelect = document.getElementById("investment-select");
+              const selectedInvestmentId = investmentSelect.value;
+
+              if (!selectedInvestmentId) {
+                  alert("Please select an investment.");
+                  return;
+              }
+
+              const data = {
+                  investment_id: selectedInvestmentId,
+                  status_date: document.getElementById("status-date").value,
+                  current_value: document.getElementById("current-value").value
+              };
+
               try {
-                  const response = await fetch(`https://personal-finance-dashboard-uu8u.onrender.com/${formId}`, {
+                  const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investment-status", {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(data)
                   });
+
                   if (!response.ok) {
                       throw new Error(`Server Error: ${response.status}`);
                   }
+
                   const message = await response.text();
                   alert(message);
-                  // Reset form fields
-                  inputs.forEach(input => input.value = '');
+                  form.reset();
+
               } catch (error) {
                   console.error('Error:', error);
-                  alert(`Failed to add ${formId} ❌`);
+                  alert("Failed to update investment status ❌");
               }
           });
+
           form.dataset.bound = "true";
       }
   }
