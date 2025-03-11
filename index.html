@@ -97,9 +97,8 @@
     <button onclick="showSection('expenses')">Expense Data</button>
     <button onclick="showSection('loans')">Loans</button>
     <button onclick="showSection('investments')">Investments</button>
-    <button onclick="showSection('investment-status')">Investment Status</button> <!-- Added Button -->
+    <button onclick="showSection('investment-status')">Investment Status</button> <!-- New Button -->
   </nav>
-
 
   <!-- Income Data Section -->
   <div id="income" class="form-section">
@@ -107,17 +106,14 @@
     <form>
       <label for="income-amount">Income Amount</label>
       <input type="number" id="income-amount" name="amount" placeholder="Enter income amount" required>
-
       <label for="income-source">Income Source</label>
       <select id="income-source" name="source" required>
         <option value="Nepsix Salary">Nepsix Salary</option>
         <option value="Nepsix Commission">Nepsix Commission</option>
         <option value="Freelance">Freelance</option>
       </select>
-
       <label for="income-date">Income Date</label>
       <input type="date" id="income-date" name="income_date" required>
-
       <button type="submit">Save Income</button>
     </form>
   </div>
@@ -128,7 +124,6 @@
     <form>
       <label for="expense-amount">Expense Amount</label>
       <input type="number" id="expense-amount" name="amount" placeholder="Enter expense amount" required>
-
       <label for="expense-category">Expense Category</label>
       <select id="expense-category" name="category" required>
         <option value="Rent">Rent</option>
@@ -140,13 +135,10 @@
         <option value="Tithe">Tithe</option>
         <option value="Ministry Giving">Ministry Giving</option>
       </select>
-
       <label for="expense-date">Expense Date</label>
       <input type="date" id="expense-date" name="expense_date" required>
-
       <label for="expense-notes">Expense Notes</label>
       <textarea id="expense-notes" name="notes" placeholder="Additional details about the expense"></textarea>
-
       <button type="submit">Save Expense</button>
     </form>
   </div>
@@ -157,158 +149,133 @@
     <form>
       <label for="loan-amount">Loan Amount</label>
       <input type="number" id="loan-amount" name="amount" placeholder="Enter loan amount" required>
-
       <label for="lender-name">Lender Name</label>
       <input type="text" id="lender-name" name="lender_name" placeholder="Enter lender name" required>
-
       <label for="loan-date">Loan Date</label>
       <input type="date" id="loan-date" name="loan_date" required>
-
       <label for="maturity-date">Maturity Date</label>
       <input type="date" id="maturity-date" name="maturity_date" required>
       <label for="loan-notes">Loan Notes</label>
       <textarea id="loan-notes" name="loan_notes" placeholder="Additional details about the loan"></textarea>
-
       <button type="submit">Save Loan</button>
     </form>
   </div>
 
   <!-- Investments Section -->
-<div id="investments" class="form-section">
-  <h3>Investments</h3>
-  <form id="investment-form">
-    <label for="investment-amount">Investment Amount</label>
-    <input type="number" id="investment-amount" name="amount" placeholder="Enter investment amount" required>
+  <div id="investments" class="form-section">
+    <h3>Investments</h3>
+    <form>
+      <label for="investment-amount">Investment Amount</label>
+      <input type="number" id="investment-amount" name="amount" placeholder="Enter investment amount" required>
+      <label for="investment-type">Investment Type</label>
+      <select id="investment-type" name="investment_type" required>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Stocks">Stocks</option>
+        <option value="Bonds">Bonds</option>
+        <option value="Mutual Funds">Mutual Funds</option>
+        <option value="Cryptocurrency">Cryptocurrency</option>
+      </select>
+      <label for="investment-date">Investment Date</label>
+      <input type="date" id="investment-date" name="investment_date" required>
+      <label for="investment-maturity-date">Investment Maturity Date</label>
+      <input type="date" id="investment-maturity-date" name="maturity_date" required>
+      <button type="submit">Save Investment</button>
+    </form>
+  </div>
 
-    <label for="investment-type">Investment Type</label>
-    <select id="investment-type" name="investment_type" required>
-      <option value="Real Estate">Real Estate</option>
-      <option value="Stocks">Stocks</option>
-      <option value="Bonds">Bonds</option>
-      <option value="Mutual Funds">Mutual Funds</option>
-      <option value="Cryptocurrency">Cryptocurrency</option>
-    </select>
+  <!-- Investment Status Update Section -->
+  <div id="investment-status" class="form-section">
+    <h3>Update Investment Status</h3>
+    <form id="investment-status-form">
+      <label for="investment-select">Select Investment</label>
+      <select id="investment-select" name="investment_id" required>
+        <option value="">Loading investments...</option>
+      </select>
+      <!-- Investment ID Field (Read-Only) -->
+      <label for="investment-id">Investment ID</label>
+      <input type="text" id="investment-id" name="investment_id_display" readonly>
+      <label for="status-date">Status Date</label>
+      <input type="date" id="status-date" name="status_date" required>
+      <label for="current-value">Current Value</label>
+      <input type="number" id="current-value" name="current_value" placeholder="Enter current value" required>
+      <button type="submit">Update Status</button>
+    </form>
+  </div>
 
-    <label for="investment-date">Investment Date</label>
-    <input type="date" id="investment-date" name="investment_date" required>
-
-    <label for="investment-maturity-date">Investment Maturity Date</label>
-    <input type="date" id="investment-maturity-date" name="maturity_date" required>
-
-    <button type="submit">Save Investment</button>
-  </form>
-</div>
-
-<!-- Investment Status Update Section -->
-<div id="investment-status" class="form-section">
-  <h3>Update Investment Status</h3>
-  <form id="investment-status-form">
-    
-    <label for="investment-select">Select Investment</label>
-    <select id="investment-select" name="investment_id" required>
-      <option value="">Loading investments...</option>
-    </select>
-
-    <!-- Investment ID Field (Read-Only) -->
-    <label for="investment-id">Investment ID</label>
-    <input type="text" id="investment-id" name="investment_id_display" readonly>
-
-    <label for="status-date">Status Date</label>
-    <input type="date" id="status-date" name="status_date" required>
-
-    <label for="current-value">Current Value</label>
-    <input type="number" id="current-value" name="current_value" placeholder="Enter current value" required>
-
-    <button type="submit">Update Status</button>
-  </form>
-</div>
-
-<script>
-  function showSection(sectionId) {
+  <script>
+    function showSection(sectionId) {
       const sections = document.querySelectorAll('.form-section');
       sections.forEach(section => section.style.display = 'none');
-
       const activeSection = document.getElementById(sectionId);
       activeSection.style.display = 'block';
-
+      
+      // If the section is "investment-status", fetch investments for the dropdown
       if (sectionId === 'investment-status') {
-          fetchInvestments();
+        fetchInvestments();
       }
-
+      
       bindFormIfNotBound(sectionId);
-  }
+    }
 
-  async function fetchInvestments() {
+    async function fetchInvestments() {
       try {
-          const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investments");
-          const investments = await response.json();
-          const select = document.getElementById("investment-select");
-          const investmentIdField = document.getElementById("investment-id");
+        const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investments");
+        const investments = await response.json();
+        const select = document.getElementById("investment-select");
+        const investmentIdField = document.getElementById("investment-id");
+        
+        // Clear previous options and set default
+        select.innerHTML = '<option value="">Select an investment</option>';
+        
+        investments.forEach(investment => {
+          const option = document.createElement("option");
+          option.value = investment.id;
+          option.textContent = `${investment.investment_type} - ₦${investment.amount}`;
+          select.appendChild(option);
+        });
 
-          select.innerHTML = '<option value="">Select an investment</option>';
-
-          investments.forEach(investment => {
-              const option = document.createElement("option");
-              option.value = investment.id;
-              option.textContent = `${investment.investment_type} - ₦${investment.amount}`;
-              select.appendChild(option);
-          });
-
-          // Ensure investment ID updates when a selection is made
-          select.addEventListener("change", function () {
-              investmentIdField.value = select.value; 
-          });
-
+        // Update the read-only Investment ID field when selection changes
+        select.addEventListener("change", function () {
+          investmentIdField.value = select.value;
+        });
       } catch (error) {
-          console.error("Failed to fetch investments:", error);
+        console.error("Failed to fetch investments:", error);
       }
-  }
+    }
 
-  function bindFormIfNotBound(formId) {
+    function bindFormIfNotBound(formId) {
       const form = document.querySelector(`#${formId} form`);
       if (!form.dataset.bound) {
-          form.addEventListener('submit', async function (e) {
-              e.preventDefault();
-
-              const investmentSelect = document.getElementById("investment-select");
-              const selectedInvestmentId = investmentSelect.value;
-
-              if (!selectedInvestmentId) {
-                  alert("Please select an investment.");
-                  return;
-              }
-
-              const data = {
-                  investment_id: selectedInvestmentId,
-                  status_date: document.getElementById("status-date").value,
-                  current_value: document.getElementById("current-value").value
-              };
-
-              try {
-                  const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investment-status", {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(data)
-                  });
-
-                  if (!response.ok) {
-                      throw new Error(`Server Error: ${response.status}`);
-                  }
-
-                  const message = await response.text();
-                  alert(message);
-                  form.reset();
-
-              } catch (error) {
-                  console.error('Error:', error);
-                  alert("Failed to update investment status ❌");
-              }
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const data = {};
+          const inputs = form.querySelectorAll('input, select, textarea');
+          inputs.forEach(input => {
+            data[input.name] = input.value;
           });
-
-          form.dataset.bound = "true";
+          try {
+            // Updated to use the production server URL
+            const response = await fetch(`https://personal-finance-dashboard-uu8u.onrender.com/${formId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+              throw new Error(`Server Error: ${response.status}`);
+            }
+            const message = await response.text();
+            alert(message);
+            // Reset form fields
+            inputs.forEach(input => input.value = '');
+          } catch (error) {
+            console.error('Error:', error);
+            alert(`Failed to add ${formId} ❌`);
+          }
+        });
+        form.dataset.bound = "true";
       }
-  }
-</script>
+    }
+  </script>
 
 </body>
 </html>

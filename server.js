@@ -1,125 +1,247 @@
-const express = require("express");
-const sql = require("mssql");
-const cors = require("cors");
-require("dotenv").config();
+const express = require('express');
+const sql = require('mssql');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
-  options: {
-    encrypt: true,
-    trustServerCertificate: true,
-  },
+// SQL Server Configuration
+const dbConfig = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_NAME, // Ensure this is set to your database name
+    port: parseInt(process.env.DB_PORT),
+    options: {
+        encrypt: true, // Use true if using Azure SQL
+        trustServerCertificate: true // For local dev
+    }
 };
 
-// Function to connect to the database
-async function connectDB() {
-  try {
-    await sql.connect(config);
-    console.log("✅ Connected to AzureSQL Database");
-  } catch (error) {
-    console.error("❌ Database connection failed:", error);
-    process.exit(1); // Exit process if DB connection fails
-  }
-}
+// Create a connection pool
+const poolPromise = new sql.ConnectionPool(dbConfig)
+    .connect()
+    .then(pool => {
+        console.log('Connected to SQL Server ✅');
+        return pool;
+    })
+    .catch(err => {
+        console.error('Database Connection Failed ❌', err);
+        process.exit(1);
+    });
 
-connectDB();
-
-// Middleware to ensure DB connection
-async function getDbPool() {
-  return new sql.ConnectionPool(config).connect();
-}
-
-// Fetch all investments (ID, amount, investment type)
-app.get("/investments", async (req, res) => {
-  try {
-    const pool = await getDbPool();
-    const result = await pool
-      .request()
-      .query("SELECT id, amount, investment_type FROM Personal_Finance.Investments");
-    
-    res.json(result.recordset);
-  } catch (error) {
-    console.error("Error fetching investments:", error);
-    res.status(500).json({ error: "Error fetching investments." });
-  }
+// Root Route
+app.get('/', (req, res) => {
+    res.send('Finance Tracker API is running 🚀');
 });
 
-// Add a new investment (Prevent SQL Injection)
-app.post("/investments", async (req, res) => {
-  try {
+// Generic Query Handler Function
+async function queryDatabase(query, inputs = []) {
+    try {
+        const pool = await poolPromise;
+        const request = pool.request();
+        inputs.forEach(input => {
+            request.input(input.name, input.type, input.value);
+        });
+        return await request.query(query);
+    } catch (err) {
+        console.error('SQL Error:', err);
+        throw err;
+    }
+}
+
+// ------------------ INCOME ENDPOINTS ------------------
+
+// 🔹 Get All Income Records
+app.get('/income', async (req, res) => {
+    try {
+        const result = await queryDatabase('SELECT * FROM Personal_Finance.Income');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add New Income Record
+app.post('/income', async (req, res) => {
+    const { amount, source, income_date } = req.body;
+
+    console.log("Received Data:", req.body); // Debug incoming request
+
+    if (!amount || !source || !income_date) {
+        return res.status(400).json({ error: 'All fields are required!' });
+    }
+
+    try {
+        let pool = await sql.connect(dbConfig);
+        let result = await pool.request()
+            .input('amount', sql.Decimal(10, 2), amount)
+            .input('source', sql.NVarChar(255), source)
+            .input('income_date', sql.Date, income_date)
+            .query(`INSERT INTO Personal_Finance.Income (amount, source, income_date) VALUES (@amount, @source, @income_date)`);
+        console.log("Inserted Data Result:", result); // Debug SQL response
+        res.send('Income record added successfully ✅');
+    } catch (err) {
+        console.error("SQL Error:", err);
+        res.status(500).json({ error: err.message });
+    } finally {
+        sql.close();
+    }
+});
+
+// ------------------ EXPENSE ENDPOINTS ------------------
+
+// 🔹 Get All Expense Records
+app.get('/expenses', async (req, res) => {
+    try {
+        const result = await queryDatabase('SELECT * FROM Personal_Finance.Expenses');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add New Expense Record
+app.post('/expenses', async (req, res) => {
+    const { amount, category, expense_date, notes } = req.body;
+
+    console.log("Received Expense Data:", req.body); // Debug log
+
+    if (!amount || !category || !expense_date) {
+        return res.status(400).json({ error: 'Amount, category, and expense_date are required!' });
+    }
+
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Expenses (amount, category, expense_date, notes) VALUES (@amount, @category, @expense_date, @notes)`,
+            [
+                { name: 'amount', type: sql.Decimal(10, 2), value: amount },
+                { name: 'category', type: sql.NVarChar(255), value: category },
+                { name: 'expense_date', type: sql.Date, value: expense_date },
+                { name: 'notes', type: sql.NVarChar(500), value: notes || '' }
+            ]
+        );
+        res.send('Expense record added successfully ✅');
+    } catch (err) {
+        console.error("SQL Error (Expenses):", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ------------------ LOAN ENDPOINTS ------------------
+
+// 🔹 Get All Loan Records
+app.get('/loans', async (req, res) => {
+    try {
+        const result = await queryDatabase('SELECT * FROM Personal_Finance.Loans');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add New Loan Record
+app.post('/loans', async (req, res) => {
+    const { amount, lender_name, loan_date, maturity_date, loan_notes } = req.body;
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Loans (amount, lender_name, loan_date, maturity_date, loan_notes) VALUES (@amount, @lender_name, @loan_date, @maturity_date, @loan_notes)`,
+            [
+                { name: 'amount', type: sql.Decimal(10, 2), value: amount },
+                { name: 'lender_name', type: sql.NVarChar(255), value: lender_name },
+                { name: 'loan_date', type: sql.Date, value: loan_date },
+                { name: 'maturity_date', type: sql.Date, value: maturity_date },
+                { name: 'loan_notes', type: sql.NVarChar(500), value: loan_notes || ''  }
+            ]
+        );
+        res.send('Loan record added successfully ✅');
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ------------------ INVESTMENT ENDPOINTS ------------------
+
+// 🔹 Get All Investment Records
+app.get('/investments', async (req, res) => {
+    try {
+        const result = await queryDatabase('SELECT * FROM Personal_Finance.Investments');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add New Investment Record
+app.post('/investments', async (req, res) => {
     const { amount, investment_type, investment_date, maturity_date } = req.body;
+
+    console.log("Received Investment Data:", req.body); // Debug log
+
     if (!amount || !investment_type || !investment_date || !maturity_date) {
-      return res.status(400).json({ error: "All fields are required." });
+        return res.status(400).json({ error: 'All fields are required!' });
     }
 
-    const pool = await getDbPool();
-    await pool.request()
-      .input("amount", sql.Decimal(18, 2), amount)
-      .input("investment_type", sql.NVarChar, investment_type)
-      .input("investment_date", sql.Date, investment_date)
-      .input("maturity_date", sql.Date, maturity_date)
-      .query(`
-        INSERT INTO investments (amount, investment_type, investment_date, maturity_date) 
-        VALUES (@amount, @investment_type, @investment_date, @maturity_date)
-      `);
-
-    res.json({ message: "Investment added successfully ✅" });
-  } catch (error) {
-    console.error("Error adding investment:", error);
-    res.status(500).json({ error: "Error adding investment." });
-  }
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Investments (amount, investment_type, investment_date, maturity_date) VALUES (@amount, @investment_type, @investment_date, @maturity_date)`,
+            [
+                { name: 'amount', type: sql.Decimal(10, 2), value: amount },
+                { name: 'investment_type', type: sql.NVarChar(255), value: investment_type },
+                { name: 'investment_date', type: sql.Date, value: investment_date },
+                { name: 'maturity_date', type: sql.Date, value: maturity_date }
+            ]
+        );
+        res.send('Investment record added successfully ✅');
+    } catch (err) {
+        console.error("SQL Error (Investments):", err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Fetch all investment statuses (with investment details)
-app.get("/investment-status", async (req, res) => {
-  try {
-    const pool = await getDbPool();
-    const result = await pool.request().query(`
-      SELECT is.id, is.investment_id, is.status_date, is.current_value, 
-             i.amount AS investment_amount, i.investment_type
-      FROM Personal_Finance.Investment_status is
-      JOIN Personal_Finance.Investments i ON is.investment_id = i.id
-    `);
-    
-    res.json(result.recordset);
-  } catch (error) {
-    console.error("Error fetching investment statuses:", error);
-    res.status(500).json({ error: "Error fetching investment statuses." });
-  }
+// ------------------ INVESTMENT STATUS ENDPOINTS ------------------
+
+// 🔹 Get All Investment Status Records
+app.get('/investment-status', async (req, res) => {
+    try {
+        const result = await queryDatabase(`
+          SELECT is.id, is.investment_id, is.status_date, is.current_value,
+                 i.amount AS investment_amount, i.investment_type
+          FROM Personal_Finance.Investment_Status is
+          JOIN Personal_Finance.Investments i ON is.investment_id = i.id
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Add investment status update (Prevent SQL Injection)
-app.post("/investment-status", async (req, res) => {
-  try {
+// 🔹 Add New Investment Status Record
+app.post('/investment-status', async (req, res) => {
     const { investment_id, status_date, current_value } = req.body;
+
     if (!investment_id || !status_date || !current_value) {
-      return res.status(400).json({ error: "All fields are required." });
+        return res.status(400).json({ error: 'All fields are required!' });
     }
 
-    const pool = await getDbPool();
-    await pool.request()
-      .input("investment_id", sql.Int, investment_id)
-      .input("status_date", sql.Date, status_date)
-      .input("current_value", sql.Decimal(18, 2), current_value)
-      .query(`
-        INSERT INTO Personal_Finance.Investment_status (investment_id, status_date, current_value)
-        VALUES (@investment_id, @status_date, @current_value)
-      `);
-
-    res.json({ message: "Investment status updated successfully ✅" });
-  } catch (error) {
-    console.error("Error updating investment status:", error);
-    res.status(500).json({ error: "Error updating investment status." });
-  }
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Investment_Status (investment_id, status_date, current_value)
+             VALUES (@investment_id, @status_date, @current_value)`,
+            [
+                { name: 'investment_id', type: sql.Int, value: investment_id },
+                { name: 'status_date', type: sql.Date, value: status_date },
+                { name: 'current_value', type: sql.Decimal(10, 2), value: current_value }
+            ]
+        );
+        res.send('Investment status updated successfully ✅');
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Start server
+// Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on https://personal-finance-dashboard-uu8u.onrender.com/${PORT}`));
