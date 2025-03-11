@@ -240,7 +240,7 @@
 
   async function fetchInvestments() {
       try {
-          const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/investments");
+          const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/Investments");
           const investments = await response.json();
           const select = document.getElementById("investment-select");
           const investmentIdField = document.getElementById("investment-id");
