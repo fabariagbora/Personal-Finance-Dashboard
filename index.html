@@ -90,14 +90,15 @@
 </head>
 <body>
 
-  <h2>Finance Tracker</h2>
+<h2>Finance Tracker</h2>
 
   <nav>
     <button onclick="showSection('income')">Income Data</button>
     <button onclick="showSection('expenses')">Expense Data</button>
     <button onclick="showSection('loans')">Loans</button>
+    <button onclick="showSection('loan-status')">Loan Status</button>
     <button onclick="showSection('investments')">Investments</button>
-    <button onclick="showSection('investment-status')">Investment Status</button> <!-- New Button -->
+    <button onclick="showSection('investment-status')">Investment Status</button>
   </nav>
 
   <!-- Income Data Section -->
@@ -142,7 +143,7 @@
       <button type="submit">Save Expense</button>
     </form>
   </div>
-
+ 
   <!-- Loans Section -->
   <div id="loans" class="form-section">
     <h3>Loans</h3>
@@ -158,6 +159,31 @@
       <label for="loan-notes">Loan Notes</label>
       <textarea id="loan-notes" name="loan_notes" placeholder="Additional details about the loan"></textarea>
       <button type="submit">Save Loan</button>
+    </form>
+  </div>
+
+  <!-- Loan Status Update Section -->
+  <div id="loan-status" class="form-section">
+    <h3>Update Loan Status</h3>
+    <form id="loan-status-form">
+      <label for="loan-select">Select Loan</label>
+      <select id="loan-select" name="loan_id" required>
+        <option value="">Loading loans...</option>
+      </select>
+      <label for="loan-id">Loan ID</label>
+      <input type="text" id="loan-id" name="loan_id_display" readonly>
+      <label for="status-date">Status Date</label>
+      <input type="date" id="status-date" name="status_date" required>
+      <label for="amount-paid">Amount Paid</label>
+      <input type="number" id="amount-paid" name="amount_paid" placeholder="Enter amount paid" required>
+      <label for="current-outstanding">Current Outstanding</label>
+      <input type="number" id="current-outstanding" name="current_outstanding" placeholder="Enter current outstanding amount" required>
+      <label for="loan-status-type">Loan Status</label>
+      <select id="loan-status-type" name="loan_status" required>
+        <option value="Active">Active</option>
+        <option value="Fully Paid">Fully Paid</option>
+      </select>
+      <button type="submit">Update Loan Status</button>
     </form>
   </div>
 
@@ -208,12 +234,11 @@
       sections.forEach(section => section.style.display = 'none');
       const activeSection = document.getElementById(sectionId);
       activeSection.style.display = 'block';
-      
-      // If the section is "investment-status", fetch investments for the dropdown
       if (sectionId === 'investment-status') {
         fetchInvestments();
+      } else if (sectionId === 'loan-status') {
+        fetchLoans();
       }
-      
       bindFormIfNotBound(sectionId);
     }
 
@@ -243,6 +268,27 @@
       }
     }
 
+    async function fetchLoans() {
+      try {
+        const response = await fetch("https://personal-finance-dashboard-uu8u.onrender.com/loans");
+        const loans = await response.json();
+        const select = document.getElementById("loan-select");
+        const loanIdField = document.getElementById("loan-id");
+        select.innerHTML = '<option value="">Select a loan</option>';
+        loans.forEach(loan => {
+          const option = document.createElement("option");
+          option.value = loan.id;
+          option.textContent = `${loan.lender_name} - ₦${loan.amount}`;
+          select.appendChild(option);
+        });
+        select.addEventListener("change", function () {
+          loanIdField.value = select.value;
+        });
+      } catch (error) {
+        console.error("Failed to fetch loans:", error);
+      }
+    }
+
     function bindFormIfNotBound(formId) {
       const form = document.querySelector(`#${formId} form`);
       if (!form.dataset.bound) {
@@ -251,10 +297,11 @@
           const data = {};
           const inputs = form.querySelectorAll('input, select, textarea');
           inputs.forEach(input => {
+            // Skip read-only display fields
+            if (input.name.endsWith('_display')) return;
             data[input.name] = input.value;
           });
           try {
-            // Updated to use the production server URL
             const response = await fetch(`https://personal-finance-dashboard-uu8u.onrender.com/${formId}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -266,7 +313,12 @@
             const message = await response.text();
             alert(message);
             // Reset form fields
-            inputs.forEach(input => input.value = '');
+            inputs.forEach(input => {
+              // Don't reset read-only fields
+              if (!input.readOnly) {
+                input.value = '';
+              }
+            });
           } catch (error) {
             console.error('Error:', error);
             alert(`Failed to add ${formId} ❌`);

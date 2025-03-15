@@ -162,6 +162,46 @@ app.post('/loans', async (req, res) => {
     }
 });
 
+// ------------------ LOAN STATUS ENDPOINTS ------------------
+// 🔹 Get All Loan Status Records
+app.get('/loan-status', async (req, res) => {
+    try {
+        const result = await queryDatabase(`
+          SELECT ls.id, ls.loan_id, ls.status_date, ls.current_outstanding, ls.loan_status,
+                 l.amount AS loan_amount, l.lender_name
+          FROM Personal_Finance.Loan_Status ls
+          JOIN Personal_Finance.Loans l ON ls.loan_id = l.id
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Add New Loan Status Record
+app.post('/loan-status', async (req, res) => {
+    const { loan_id, current_outstanding, status_date, loan_status } = req.body;
+    if (!loan_id || !current_outstanding || !status_date || !loan_status) {
+        return res.status(400).json({ error: 'All fields are required!' });
+    }
+    try {
+        await queryDatabase(
+            `INSERT INTO Personal_Finance.Loan_Status (loan_id, current_outstanding, status_date, loan_status)
+             VALUES (@loan_id, @current_outstanding, @status_date, @loan_status)`,
+            [
+                { name: 'loan_id', type: sql.Int, value: loan_id },
+                { name: 'current_outstanding', type: sql.Decimal(18, 2), value: current_outstanding },
+                { name: 'status_date', type: sql.Date, value: status_date },
+                { name: 'loan_status', type: sql.NVarChar(50), value: loan_status }
+            ]
+        );
+        res.send('Loan status record added successfully ✅');
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // ------------------ INVESTMENT ENDPOINTS ------------------
 
 // 🔹 Get All Investment Records
