@@ -26,7 +26,7 @@ DATABASE_URL = f"{DB_TYPE}://{DB_USER}:{encoded_password}@{DB_SERVER}/{DB_NAME}?
 engine = create_engine(DATABASE_URL)
 
 # Extract: Read CSV file
-csv_file_path = "C:/Users/USER/Documents/InvestmentTable.csv" 
+csv_file_path = "C:/Users/USER/Downloads/natural_expenses_data.csv"
 df = pd.read_csv(csv_file_path)
 
 # Transform: Example - Rename columns, handle missing values
@@ -34,8 +34,9 @@ df.columns = df.columns.str.lower().str.replace(" ", "_")  # Convert column name
 df.fillna("", inplace=True)  # Replace NaN with empty strings
 
 # Load: Insert data into the database
-table_name = "Investments" 
-df.to_sql("Investments", con=engine, schema="Personal_Finance", if_exists="append", index=False)
+table_name = "Expenses"
+df.to_sql(table_name, con=engine, schema="Personal_Finance", if_exists="append", index=False)
+
 
 
 print(table_name + " Data inserted successfully!")
