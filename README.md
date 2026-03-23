@@ -148,4 +148,4 @@ It serves as a complete solution for **personal financial tracking and decision-
 
 ## 🔗 Live Dashboard
 
-👉 [View Dashboard](https://github.com/fabariagbora/Personal-Finance-Dashboard/dashboard.html)
+👉 [View Dashboard](https://fabariagbora.github.io/Personal-Finance-Dashboard/)
